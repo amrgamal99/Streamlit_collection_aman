@@ -15,8 +15,6 @@ fsspec==2024.2.0
 
 # Jupyter and related tools
 jupyter==1.0.0
-jupyter-server>=2.4.0,<3
-jupyterlab==4.0.0  
 notebook==7.0.3
 jupyter-client==8.2.0
 ipython==8.14.0
