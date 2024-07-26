@@ -12,7 +12,7 @@ datashader==0.14.0
 arrow==1.2.3
 pyarrow==13.0.0
 fsspec==2024.2.0
-pytables==3.7.0
+pytables==3.6.1
 
 # Jupyter and related tools
 jupyter==1.0.0
