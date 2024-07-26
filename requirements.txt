@@ -21,8 +21,7 @@ notebook==7.0.3
 jupyter-client==8.2.0
 ipython==8.14.0
 ipywidgets==8.0.2
-jupyterlab==3.6.0
-jupyter-server==2.0.0
+
 
 # Web and HTTP
 aiohttp==3.8.5
