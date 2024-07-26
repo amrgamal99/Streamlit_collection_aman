@@ -15,11 +15,13 @@ fsspec==2024.2.0
 
 # Jupyter and related tools
 jupyter==1.0.0
-jupyterlab==4.0.0  # Updated version to match notebook 7.x.x
+jupyter-server>=2.4.0,<3
+jupyterlab==4.0.0  
 notebook==7.0.3
 jupyter-client==8.2.0
 ipython==8.14.0
 ipywidgets==8.0.2
+jupyterlab==3.6.0
 jupyter-server==2.0.0
 
 # Web and HTTP
@@ -65,6 +67,4 @@ six==1.16.0
 cryptography==40.0.2
 pyjwt==2.8.0
 
-# Optional for JupyterLab extensions
-# jupyterlab-git==0.34.0
-# jupyterlab-variableinspector==0.2.3  # Remove or replace if needed
+
