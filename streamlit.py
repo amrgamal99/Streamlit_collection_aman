@@ -2,11 +2,28 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Function to load data
 def load_data():
-    result_sql = pd.read_csv("result_sql.csv")
-    card = pd.read_csv("card_dues.csv")
+    st.sidebar.header("Upload your data files")
+    
+    result_sql_file = st.sidebar.file_uploader("Upload result_sql.csv", type=["csv"])
+    card_file = st.sidebar.file_uploader("Upload card_dues.csv", type=["csv"])
+    
+    if result_sql_file is not None:
+        st.write("Result SQL file uploaded")
+        result_sql = pd.read_csv(result_sql_file)
+    else:
+        st.write("Result SQL file not uploaded")
+        return None, None
+    
+    if card_file is not None:
+        st.write("Card file uploaded")
+        card = pd.read_csv(card_file)
+    else:
+        st.write("Card file not uploaded")
+        return None, None
+    
     return result_sql, card
+
 
 # Function to process Card data for Phase 1
 def process_card_phase1(card):
