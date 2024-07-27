@@ -4,6 +4,10 @@ import findspark
 import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
+import os
+
+
+os.environ['JAVA_HOME'] = 'C:\\Program Files\\Java\\jdk-11.0.24'
 
 # Initialize findspark
 findspark.init()
@@ -104,16 +108,16 @@ def process_data(phase1_file, phase2_paid_file, phase2_not_paid_file, dues_data,
 
 # Process data for card and normal customers
 card_metrics = process_data(
-    "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution1_Will Pay Alone_2024-07.xlsx",
-    "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution2_ Will Pay Alone_2024-07.xlsx",
-    "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution2_ Will Not Pay_2024-07.xlsx",
+    r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\list_of_customers\Card_Solution1_Will Pay Alone_2024-07.xlsx",
+    r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\list_of_customers\Card_Solution2_ Will Pay Alone_2024-07.xlsx",
+    r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\list_of_customers\Card_Solution2_ Will Not Pay_2024-07.xlsx",
     card, result_sql_spark, date
 )
 
 normal_metrics = process_data(
-    "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Normal_Solution1_Will Pay Alone_2024-07.xlsx",
-    "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Normal_Solution2_ Will Pay Alone_2024-07.xlsx",
-    "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Normal_Solution2_ Will Not Pay_2024-07.xlsx",
+    r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\list_of_customers\Normal_Solution1_Will Pay Alone_2024-07.xlsx",
+    r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\list_of_customers\Normal_Solution2_ Will Pay Alone_2024-07.xlsx",
+    r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\list_of_customers\Normal_Solution2_ Will Not Pay_2024-07.xlsx",
     normal, result_sql_spark, date
 )
 
