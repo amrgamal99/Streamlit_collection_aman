@@ -20,14 +20,15 @@ except Exception as e:
 
 # Load data
 try:
-    result_sql = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/result_sql.csv")
+    result_sql = pd.read_csv(r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\data\result_sql.csv")
     result_sql_spark = spark.createDataFrame(result_sql)
-    card = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/card_dues.csv")
-    normal = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/normal_dues.csv")
-    date = "2024-07"
-    next_date = "2024-08"
-except Exception as e:
+    card = pd.read_csv(r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\data\card_dues.csv")
+    normal = pd.read_csv(r"C:\Users\PC\OneDrive - Cairo University - Students\aman internship\collection_data\Data Science - Internship-20240723T123248Z-001\Data Science - Internship\data\normal_dues.csv")
+except FileNotFoundError as e:
     st.error(f"Error loading data: {e}")
+
+date = "2024-07"
+next_date = "2024-08"
 
 # Define function to process data
 def process_data(phase1_file, phase2_paid_file, phase2_not_paid_file, dues_data, result_sql_spark, date):
