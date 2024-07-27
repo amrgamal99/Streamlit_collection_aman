@@ -26,13 +26,27 @@ def load_data():
 
 
 # Function to process Card data for Phase 1
-def process_card_phase1(card):
-    hopefull_card = pd.read_excel("Card_Solution1_Will_Pay_Alone.xlsx")
-    hopefull_card["installment_uniqueid"] = hopefull_card["installment_uniqueid"].astype(str)
-    our_cases_card = card.merge(hopefull_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
-    our_cases_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_card['trx_actual_collection_date'])
-    our_cases_card['trx_actual_collection_date_only'] = our_cases_card['trx_actual_collection_date'].dt.date
-    return our_cases_card
+def process_card_phase1(card_file):
+    if card_file is not None:
+        card = pd.read_csv(card_file)
+        st.write("Card file uploaded successfully.")
+        
+        # Assume uploaded card file contains relevant data
+        hopefull_card = st.file_uploader("Upload Card Phase 1 Excel file", type=["xlsx"])
+        if hopefull_card is not None:
+            hopefull_card_df = pd.read_excel(hopefull_card)
+            hopefull_card_df["installment_uniqueid"] = hopefull_card_df["installment_uniqueid"].astype(str)
+            our_cases_card = card.merge(hopefull_card_df[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+            our_cases_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_card['trx_actual_collection_date'])
+            our_cases_card['trx_actual_collection_date_only'] = our_cases_card['trx_actual_collection_date'].dt.date
+            return our_cases_card
+        else:
+            st.write("Please upload the Card Phase 1 Excel file.")
+            return None
+    else:
+        st.write("Please upload the Card CSV file.")
+        return None
+
 
 # Function to process Card data for Phase 2
 def process_card_phase2(card):
