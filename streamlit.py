@@ -7,7 +7,7 @@ from pyspark.sql.functions import col
 import os
 
 
-os.environ['JAVA_HOME'] = 'C:\\Program Files\\Java\\jdk-11'
+os.environ['JAVA_HOME'] = 'C:\\Program Files\\Java\\jdk-11.0.24'
 
 # Initialize findspark
 findspark.init()
