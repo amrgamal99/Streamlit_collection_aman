@@ -5,17 +5,25 @@ import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
-# Initialize Spark
+# Initialize findspark
 findspark.init()
-spark = SparkSession.builder.getOrCreate()
+
+# Create or get Spark session
+try:
+    spark = SparkSession.builder.getOrCreate()
+except Exception as e:
+    st.error(f"Error initializing Spark session: {e}")
 
 # Load data
-result_sql = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/result_sql.csv")
-result_sql_spark = spark.createDataFrame(result_sql)
-card = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/card_dues.csv")
-normal = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/card_dues.csv")
-date = "2024-07"
-next_date = "2024-08"
+try:
+    result_sql = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/result_sql.csv")
+    result_sql_spark = spark.createDataFrame(result_sql)
+    card = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/card_dues.csv")
+    normal = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/normal_dues.csv")
+    date = "2024-07"
+    next_date = "2024-08"
+except Exception as e:
+    st.error(f"Error loading data: {e}")
 
 # Define function to process data
 def process_data(phase1_file, phase2_paid_file, phase2_not_paid_file, dues_data, result_sql_spark, date):
@@ -108,6 +116,7 @@ normal_metrics = process_data(
     "C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Normal_Solution2_ Will Not Pay_2024-07.xlsx",
     normal, result_sql_spark, date
 )
+
 # Create the Streamlit interface
 st.title('Customer Payment Prediction Dashboard')
 
