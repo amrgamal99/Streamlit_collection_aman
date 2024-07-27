@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import findspark
+import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
@@ -141,4 +142,3 @@ elif phase == 'Phase 2 Not Paid':
     st.write(f"Not Paid Customers: {phase_metrics['not_paid_customers']}")
     st.write(f"Percentage Not Paid: {phase_metrics['percentage_not_paid']:.2f}%")
     st.write(f"Not Paid After Call: {phase_metrics['not_paid_after_call']}")
-
