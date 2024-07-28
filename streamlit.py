@@ -181,43 +181,28 @@ def process_normal_data(files):
     }
 
 # Streamlit app
-st.title("Collection Rate Analysis")
-
-# File uploader in the sidebar
-st.sidebar.header("Upload your CSV and Excel files")
+st.sidebar.title("Upload Files")
 uploaded_files = {
-    'result_sql.csv': st.sidebar.file_uploader("Upload result_sql.csv", type=["csv"]),
-    'card_dues.csv': st.sidebar.file_uploader("Upload card_dues.csv", type=["csv"]),
-    'normal_dues.csv': st.sidebar.file_uploader("Upload normal_dues.csv", type=["csv"]),
-    'Phase 1 Card.xlsx': st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type=["xlsx"]),
-    'Phase 2 Self Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type=["xlsx"]),
-    'Phase 2 Not Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type=["xlsx"]),
-    'Phase 1 Normal.xlsx': st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type=["xlsx"]),
-    'Phase 2 Self Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type=["xlsx"]),
-    'Phase 2 Not Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type=["xlsx"])
+    "result_sql.csv": st.sidebar.file_uploader("Upload result_sql.csv", type="csv"),
+    "card_dues.csv": st.sidebar.file_uploader("Upload card_dues.csv", type="csv"),
+    "normal_dues.csv": st.sidebar.file_uploader("Upload normal_dues.csv", type="csv"),
+    "Phase 1 Card.xlsx": st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type="xlsx"),
+    "Phase 2 Self Pay Card.xlsx": st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type="xlsx"),
+    "Phase 2 Not Pay Card.xlsx": st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type="xlsx"),
+    "Phase 1 Normal.xlsx": st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type="xlsx"),
+    "Phase 2 Self Pay Normal.xlsx": st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type="xlsx"),
+    "Phase 2 Not Pay Normal.xlsx": st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type="xlsx")
 }
 
-# Ensure all required files are uploaded
-if all(uploaded_files.values()):
-    # Dropdown menu for category selection
-    category = st.selectbox("Select Category", ["Card", "Normal"])
+category = st.sidebar.selectbox("Select Category", ["Card", "Normal"])
 
-    if category == "Card":
-        metrics = process_card_data(uploaded_files)
-    else:
-        metrics = process_normal_data(uploaded_files)
-
-    if metrics:
-        # Create a DataFrame from the metrics dictionary
-        df_metrics = pd.DataFrame.from_dict(metrics, orient='index', columns=['Value']).reset_index()
-        df_metrics.columns = ['Metric', 'Value']
-
-        # Transpose the DataFrame
-        df_metrics = df_metrics.T
-        df_metrics.columns = df_metrics.iloc[0]
-        df_metrics = df_metrics[1:]
-
-        # Display the DataFrame
-        st.write(df_metrics)
+if category == "Card":
+    card_data = process_card_data(uploaded_files)
+    if card_data:
+        st.write("Card Data Analysis")
+        st.table(pd.DataFrame([card_data]))
 else:
-    st.warning("Please upload all required files.")
+    normal_data = process_normal_data(uploaded_files)
+    if normal_data:
+        st.write("Normal Data Analysis")
+        st.table(pd.DataFrame([normal_data]))
