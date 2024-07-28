@@ -180,23 +180,34 @@ def process_normal_data(files):
         "Phase 2 Count with Working Date (Not Pay)": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique()
     }
 
-st.sidebar.title("File Upload")
+st.sidebar.title("Upload Excel Files")
+uploaded_files = {
+    'result_sql.csv': st.sidebar.file_uploader("Upload result_sql.csv", type=["csv"]),
+    'card_dues.csv': st.sidebar.file_uploader("Upload card_dues.csv", type=["csv"]),
+    'normal_dues.csv': st.sidebar.file_uploader("Upload normal_dues.csv", type=["csv"]),
+    'Phase 1 Card.xlsx': st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type=["xlsx"]),
+    'Phase 2 Self Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type=["xlsx"]),
+    'Phase 2 Not Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type=["xlsx"]),
+    'Phase 1 Normal.xlsx': st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type=["xlsx"]),
+    'Phase 2 Self Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type=["xlsx"]),
+    'Phase 2 Not Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type=["xlsx"])
+}
 
-category = st.sidebar.selectbox("Select Category", ["Card", "Normal"])
+category = st.selectbox("Select Category", ["Card", "Normal"])
 
-uploaded_files = st.sidebar.file_uploader("Upload CSV/Excel Files", accept_multiple_files=True)
-
-if uploaded_files:
-    file_dict = {file.name: file for file in uploaded_files}
-    if category == "Card":
-        card_data = process_card_data(file_dict)
+if category == "Card":
+    if all(uploaded_files[key] for key in ['result_sql.csv', 'card_dues.csv', 'Phase 1 Card.xlsx', 'Phase 2 Self Pay Card.xlsx', 'Phase 2 Not Pay Card.xlsx']):
+        card_data = process_card_data(uploaded_files)
         if card_data:
-            card_df = pd.DataFrame(card_data, index=[0])
-            st.write("Card Data")
-            st.dataframe(card_df)
-    elif category == "Normal":
-        normal_data = process_normal_data(file_dict)
+            st.write("Card Data Metrics")
+            st.write(card_data)
+    else:
+        st.warning("Please upload all Card related files.")
+elif category == "Normal":
+    if all(uploaded_files[key] for key in ['result_sql.csv', 'normal_dues.csv', 'Phase 1 Normal.xlsx', 'Phase 2 Self Pay Normal.xlsx', 'Phase 2 Not Pay Normal.xlsx']):
+        normal_data = process_normal_data(uploaded_files)
         if normal_data:
-            normal_df = pd.DataFrame(normal_data, index=[0])
-            st.write("Normal Data")
-            st.dataframe(normal_df)
+            st.write("Normal Data Metrics")
+            st.write(normal_data)
+    else:
+        st.warning("Please upload all Normal related files.")
