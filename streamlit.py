@@ -182,7 +182,7 @@ def process_normal_data(files):
 
 # Main app
 def main():
-    st.title("Customer Payment Data Analysis")
+    st.title("Collection Monitoring")
     st.sidebar.header("Upload Files")
 
     file_types = ["csv", "xlsx"]
