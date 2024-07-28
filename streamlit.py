@@ -92,7 +92,7 @@ def process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, 
     }
 
 # Streamlit app
-st.title("Collection Data Analysis")
+st.title("Collection monitoring")
 
 st.sidebar.title("Upload Files")
 result_sql_file = st.sidebar.file_uploader("Upload result_sql.csv", type="csv")
