@@ -219,7 +219,7 @@ else:
         card_metrics = process_card_data(files)
         if card_metrics:
             card_data = {
-                'Phase': ['Phase 1', 'Phase 2', 'Not Paid'],
+                'Solutions': ['Phase 1', 'Phase 2', 'Not Paid'],
                 'Collection Rate': [
                     card_metrics['phase1']['collection_rate'],
                     card_metrics['phase2']['collection_rate'],
