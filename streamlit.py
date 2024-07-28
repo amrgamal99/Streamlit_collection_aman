@@ -111,7 +111,7 @@ def process_normal_data(files):
         st.error(f"Error reading Phase 1 Normal.xlsx: {e}")
         return None
 
-    try:
+    try {
         phase2_self_pay_normal = pd.read_excel(files['Phase 2 Self Pay Normal.xlsx'])
     except Exception as e:
         st.error(f"Error reading Phase 2 Self Pay Normal.xlsx: {e}")
@@ -199,15 +199,57 @@ if category == "Card":
     if all(uploaded_files[key] for key in ['result_sql.csv', 'card_dues.csv', 'Phase 1 Card.xlsx', 'Phase 2 Self Pay Card.xlsx', 'Phase 2 Not Pay Card.xlsx']):
         card_data = process_card_data(uploaded_files)
         if card_data:
+            card_df = pd.DataFrame({
+                "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
+                "Phase 1": [
+                    card_data["Phase 1 Collection Rate"],
+                    card_data["Phase 1 Count"],
+                    card_data["Phase 1 Rate with Working Date"],
+                    card_data["Phase 1 Count with Working Date"]
+                ],
+                "Phase 2 (Self Pay)": [
+                    card_data["Phase 2 Collection Rate (Self Pay)"],
+                    card_data["Phase 2 Count (Self Pay)"],
+                    card_data["Phase 2 Rate with Working Date (Self Pay)"],
+                    card_data["Phase 2 Count with Working Date (Self Pay)"]
+                ],
+                "Phase 2 (Not Pay)": [
+                    card_data["Phase 2 Collection Rate (Not Pay)"],
+                    card_data["Phase 2 Count (Not Pay)"],
+                    card_data["Phase 2 Rate with Working Date (Not Pay)"],
+                    card_data["Phase 2 Count with Working Date (Not Pay)"]
+                ]
+            })
             st.write("Card Data Metrics")
-            st.write(card_data)
+            st.write(card_df)
     else:
         st.warning("Please upload all Card related files.")
 elif category == "Normal":
     if all(uploaded_files[key] for key in ['result_sql.csv', 'normal_dues.csv', 'Phase 1 Normal.xlsx', 'Phase 2 Self Pay Normal.xlsx', 'Phase 2 Not Pay Normal.xlsx']):
         normal_data = process_normal_data(uploaded_files)
         if normal_data:
+            normal_df = pd.DataFrame({
+                "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
+                "Phase 1": [
+                    normal_data["Phase 1 Collection Rate"],
+                    normal_data["Phase 1 Count"],
+                    normal_data["Phase 1 Rate with Working Date"],
+                    normal_data["Phase 1 Count with Working Date"]
+                ],
+                "Phase 2 (Self Pay)": [
+                    normal_data["Phase 2 Collection Rate (Self Pay)"],
+                    normal_data["Phase 2 Count (Self Pay)"],
+                    normal_data["Phase 2 Rate with Working Date (Self Pay)"],
+                    normal_data["Phase 2 Count with Working Date (Self Pay)"]
+                ],
+                "Phase 2 (Not Pay)": [
+                    normal_data["Phase 2 Collection Rate (Not Pay)"],
+                    normal_data["Phase 2 Count (Not Pay)"],
+                    normal_data["Phase 2 Rate with Working Date (Not Pay)"],
+                    normal_data["Phase 2 Count with Working Date (Not Pay)"]
+                ]
+            })
             st.write("Normal Data Metrics")
-            st.write(normal_data)
+            st.write(normal_df)
     else:
         st.warning("Please upload all Normal related files.")
