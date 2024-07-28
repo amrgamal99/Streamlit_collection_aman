@@ -193,7 +193,7 @@ def process_normal_data(files):
     }
 
 # Streamlit app
-st.title("Customer Payment Analysis Dashboard")
+st.title("Collection Monitoring")
 
 # File uploader widgets
 st.sidebar.title("Upload Files")
