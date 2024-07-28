@@ -13,25 +13,25 @@ def process_data(category, files):
     try:
         dues = pd.read_csv(files[f'{category.lower()}_dues.csv'])
     except Exception as e:
-        st.error(f"Error reading dues.csv: {e}")
+        st.error(f"Error reading {category.lower()}_dues.csv: {e}")
         return None
 
     try:
         hopefull = pd.read_excel(files[f'Phase 1 {category}.xlsx'])
     except Exception as e:
-        st.error(f"Error reading Phase 1 Excel file: {e}")
+        st.error(f"Error reading Phase 1 {category}.xlsx: {e}")
         return None
 
     try:
         phase2_self_pay = pd.read_excel(files[f'Phase 2 Self Pay {category}.xlsx'])
     except Exception as e:
-        st.error(f"Error reading Phase 2 Self Pay Excel file: {e}")
+        st.error(f"Error reading Phase 2 Self Pay {category}.xlsx: {e}")
         return None
 
     try:
         phase2_not_pay = pd.read_excel(files[f'Phase 2 Not Pay {category}.xlsx'])
     except Exception as e:
-        st.error(f"Error reading Phase 2 Not Pay Excel file: {e}")
+        st.error(f"Error reading Phase 2 Not Pay {category}.xlsx: {e}")
         return None
 
     dues["installment_uniqueid"] = dues["installment_uniqueid"].astype(str)
