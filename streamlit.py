@@ -77,18 +77,24 @@ def process_card_data(files):
     check3_card = filtered_result_sql.merge(ids_with_dates3_card, on="installment_uniqueid", how="inner")
 
     return {
-        "Phase 1 Collection Rate": collected_cases_card["installment_uniqueid"].nunique() / hopefull_card["installment_uniqueid"].nunique(),
-        "Phase 1 Count": collected_cases_card["installment_uniqueid"].nunique(),
-        "Phase 1 Rate with Working Date": check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_card.shape[0],
-        "Phase 1 Count with Working Date": check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
-        "Phase 2 Collection Rate (Self Pay)": collected_cases_2_card["installment_uniqueid"].nunique() / phase2_self_pay_card["installment_uniqueid"].nunique(),
-        "Phase 2 Count (Self Pay)": collected_cases_2_card["installment_uniqueid"].nunique(),
-        "Phase 2 Rate with Working Date (Self Pay)": check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_card.shape[0],
-        "Phase 2 Count with Working Date (Self Pay)": check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
-        "Phase 2 Collection Rate (Not Pay)": collected_cases_3_card["installment_uniqueid"].nunique() / phase2_not_pay_card["installment_uniqueid"].nunique(),
-        "Phase 2 Count (Not Pay)": collected_cases_3_card["installment_uniqueid"].nunique(),
-        "Phase 2 Rate with Working Date (Not Pay)": check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_card.shape[0],
-        "Phase 2 Count with Working Date (Not Pay)": check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
+        "phase1": {
+            "collection_rate": collected_cases_card["installment_uniqueid"].nunique() / hopefull_card["installment_uniqueid"].nunique(),
+            "count": collected_cases_card["installment_uniqueid"].nunique(),
+            "after_call_rate": check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_card.shape[0],
+            "after_call_count": check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
+        },
+        "phase2": {
+            "collection_rate": collected_cases_2_card["installment_uniqueid"].nunique() / phase2_self_pay_card["installment_uniqueid"].nunique(),
+            "count": collected_cases_2_card["installment_uniqueid"].nunique(),
+            "after_call_rate": check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_card.shape[0],
+            "after_call_count": check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
+        },
+        "not_paid": {
+            "collection_rate": collected_cases_3_card["installment_uniqueid"].nunique() / phase2_not_pay_card["installment_uniqueid"].nunique(),
+            "count": collected_cases_3_card["installment_uniqueid"].nunique(),
+            "after_call_rate": check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_card.shape[0],
+            "after_call_count": check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
+        }
     }
 
 # Function to process Normal data
@@ -166,43 +172,102 @@ def process_normal_data(files):
     check3_normal = filtered_result_sql.merge(ids_with_dates3_normal, on="installment_uniqueid", how="inner")
 
     return {
-        "Phase 1 Collection Rate": collected_cases_normal["installment_uniqueid"].nunique() / hopefull_normal["installment_uniqueid"].nunique(),
-        "Phase 1 Count": collected_cases_normal["installment_uniqueid"].nunique(),
-        "Phase 1 Rate with Working Date": check_normal[check_normal["start_working_date"] < check_normal["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_normal.shape[0],
-        "Phase 1 Count with Working Date": check_normal[check_normal["start_working_date"] < check_normal["trx_actual_collection_date"]].installment_uniqueid.nunique(),
-        "Phase 2 Collection Rate (Self Pay)": collected_cases_2_normal["installment_uniqueid"].nunique() / phase2_self_pay_normal["installment_uniqueid"].nunique(),
-        "Phase 2 Count (Self Pay)": collected_cases_2_normal["installment_uniqueid"].nunique(),
-        "Phase 2 Rate with Working Date (Self Pay)": check2_normal[check2_normal["start_working_date"] < check2_normal["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_normal.shape[0],
-        "Phase 2 Count with Working Date (Self Pay)": check2_normal[check2_normal["start_working_date"] < check2_normal["trx_actual_collection_date"]].installment_uniqueid.nunique(),
-        "Phase 2 Collection Rate (Not Pay)": collected_cases_3_normal["installment_uniqueid"].nunique() / phase2_not_pay_normal["installment_uniqueid"].nunique(),
-        "Phase 2 Count (Not Pay)": collected_cases_3_normal["installment_uniqueid"].nunique(),
-        "Phase 2 Rate with Working Date (Not Pay)": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_normal.shape[0],
-        "Phase 2 Count with Working Date (Not Pay)": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique()
+        "phase1": {
+            "collection_rate": collected_cases_normal["installment_uniqueid"].nunique() / hopefull_normal["installment_uniqueid"].nunique(),
+            "count": collected_cases_normal["installment_uniqueid"].nunique(),
+            "after_call_rate": check_normal[check_normal["start_working_date"] < check_normal["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_normal.shape[0],
+            "after_call_count": check_normal[check_normal["start_working_date"] < check_normal["trx_actual_collection_date"]].installment_uniqueid.nunique(),
+        },
+        "phase2": {
+            "collection_rate": collected_cases_2_normal["installment_uniqueid"].nunique() / phase2_self_pay_normal["installment_uniqueid"].nunique(),
+            "count": collected_cases_2_normal["installment_uniqueid"].nunique(),
+            "after_call_rate": check2_normal[check2_normal["start_working_date"] < check2_normal["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_normal.shape[0],
+            "after_call_count": check2_normal[check2_normal["start_working_date"] < check2_normal["trx_actual_collection_date"]].installment_uniqueid.nunique(),
+        },
+        "not_paid": {
+            "collection_rate": collected_cases_3_normal["installment_uniqueid"].nunique() / phase2_not_pay_normal["installment_uniqueid"].nunique(),
+            "count": collected_cases_3_normal["installment_uniqueid"].nunique(),
+            "after_call_rate": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_normal.shape[0],
+            "after_call_count": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique(),
+        }
     }
 
 # Streamlit app
+st.title("Customer Payment Analysis Dashboard")
+
+# File uploader widgets
 st.sidebar.title("Upload Files")
-uploaded_files = {
-    "result_sql.csv": st.sidebar.file_uploader("Upload result_sql.csv", type="csv"),
-    "card_dues.csv": st.sidebar.file_uploader("Upload card_dues.csv", type="csv"),
-    "normal_dues.csv": st.sidebar.file_uploader("Upload normal_dues.csv", type="csv"),
-    "Phase 1 Card.xlsx": st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type="xlsx"),
-    "Phase 2 Self Pay Card.xlsx": st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type="xlsx"),
-    "Phase 2 Not Pay Card.xlsx": st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type="xlsx"),
-    "Phase 1 Normal.xlsx": st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type="xlsx"),
-    "Phase 2 Self Pay Normal.xlsx": st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type="xlsx"),
-    "Phase 2 Not Pay Normal.xlsx": st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type="xlsx")
+files = {
+    'result_sql.csv': st.sidebar.file_uploader("Upload result_sql.csv", type="csv"),
+    'card_dues.csv': st.sidebar.file_uploader("Upload card_dues.csv", type="csv"),
+    'normal_dues.csv': st.sidebar.file_uploader("Upload normal_dues.csv", type="csv"),
+    'Phase 1 Card.xlsx': st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type="xlsx"),
+    'Phase 2 Self Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type="xlsx"),
+    'Phase 2 Not Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type="xlsx"),
+    'Phase 1 Normal.xlsx': st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type="xlsx"),
+    'Phase 2 Self Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type="xlsx"),
+    'Phase 2 Not Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type="xlsx"),
 }
 
-category = st.sidebar.selectbox("Select Category", ["Card", "Normal"])
-
-if category == "Card":
-    card_data = process_card_data(uploaded_files)
-    if card_data:
-        st.write("Card Data Analysis")
-        st.table(pd.DataFrame([card_data]))
+if None in files.values():
+    st.warning("Please upload all the required files.")
 else:
-    normal_data = process_normal_data(uploaded_files)
-    if normal_data:
-        st.write("Normal Data Analysis")
-        st.table(pd.DataFrame([normal_data]))
+    # Dropdown for selecting Card or Normal
+    option = st.selectbox("Select Category", ["Card", "Normal"])
+
+    if option == "Card":
+        card_metrics = process_card_data(files)
+        if card_metrics:
+            card_data = {
+                'Phase': ['Phase 1', 'Phase 2', 'Not Paid'],
+                'Collection Rate': [
+                    card_metrics['phase1']['collection_rate'],
+                    card_metrics['phase2']['collection_rate'],
+                    card_metrics['not_paid']['collection_rate']
+                ],
+                'Count': [
+                    card_metrics['phase1']['count'],
+                    card_metrics['phase2']['count'],
+                    card_metrics['not_paid']['count']
+                ],
+                'After Call Rate': [
+                    card_metrics['phase1']['after_call_rate'],
+                    card_metrics['phase2']['after_call_rate'],
+                    card_metrics['not_paid']['after_call_rate']
+                ],
+                'After Call Count': [
+                    card_metrics['phase1']['after_call_count'],
+                    card_metrics['phase2']['after_call_count'],
+                    card_metrics['not_paid']['after_call_count']
+                ]
+            }
+            df_card = pd.DataFrame(card_data)
+            st.table(df_card)
+    else:
+        normal_metrics = process_normal_data(files)
+        if normal_metrics:
+            normal_data = {
+                'Phase': ['Phase 1', 'Phase 2', 'Not Paid'],
+                'Collection Rate': [
+                    normal_metrics['phase1']['collection_rate'],
+                    normal_metrics['phase2']['collection_rate'],
+                    normal_metrics['not_paid']['collection_rate']
+                ],
+                'Count': [
+                    normal_metrics['phase1']['count'],
+                    normal_metrics['phase2']['count'],
+                    normal_metrics['not_paid']['count']
+                ],
+                'After Call Rate': [
+                    normal_metrics['phase1']['after_call_rate'],
+                    normal_metrics['phase2']['after_call_rate'],
+                    normal_metrics['not_paid']['after_call_rate']
+                ],
+                'After Call Count': [
+                    normal_metrics['phase1']['after_call_count'],
+                    normal_metrics['phase2']['after_call_count'],
+                    normal_metrics['not_paid']['after_call_count']
+                ]
+            }
+            df_normal = pd.DataFrame(normal_data)
+            st.table(df_normal)
