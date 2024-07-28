@@ -142,7 +142,7 @@ def process_normal_data(files):
 
     start_date = pd.Timestamp("2024-07-05")
     filtered_result_sql = result_sql[result_sql["start_working_date"] >= start_date]
-    check_normal = filtered_result_sql.merge(ids_with_dates_normal, on "installment_uniqueid", how="inner")
+    check_normal = filtered_result_sql.merge(ids_with_dates_normal, on="installment_uniqueid", how="inner")
 
     test_phase2_normal = normal.copy()
     our_cases_2_normal = test_phase2_normal.merge(
