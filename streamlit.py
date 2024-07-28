@@ -111,7 +111,7 @@ def process_normal_data(files):
         st.error(f"Error reading Phase 1 Normal.xlsx: {e}")
         return None
 
-    try {
+    try:
         phase2_self_pay_normal = pd.read_excel(files['Phase 2 Self Pay Normal.xlsx'])
     except Exception as e:
         st.error(f"Error reading Phase 2 Self Pay Normal.xlsx: {e}")
