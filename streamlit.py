@@ -180,34 +180,23 @@ def process_normal_data(files):
         "Phase 2 Count with Working Date (Not Pay)": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique()
     }
 
-# Streamlit app
-st.title("Customer Data Analysis")
+st.sidebar.title("File Upload")
 
-# File uploaders for Card and Normal categories
-uploaded_files = {
-    "result_sql.csv": st.file_uploader("Upload result_sql.csv", type="csv"),
-    "card_dues.csv": st.file_uploader("Upload card_dues.csv", type="csv"),
-    "Phase 1 Card.xlsx": st.file_uploader("Upload Phase 1 Card.xlsx", type="xlsx"),
-    "Phase 2 Self Pay Card.xlsx": st.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type="xlsx"),
-    "Phase 2 Not Pay Card.xlsx": st.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type="xlsx"),
-    "normal_dues.csv": st.file_uploader("Upload normal_dues.csv", type="csv"),
-    "Phase 1 Normal.xlsx": st.file_uploader("Upload Phase 1 Normal.xlsx", type="xlsx"),
-    "Phase 2 Self Pay Normal.xlsx": st.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type="xlsx"),
-    "Phase 2 Not Pay Normal.xlsx": st.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type="xlsx"),
-}
+category = st.sidebar.selectbox("Select Category", ["Card", "Normal"])
 
-# Ensure all required files are uploaded
-if all(uploaded_files.values()):
-    category = st.selectbox("Select Category", ["Card", "Normal"])
+uploaded_files = st.sidebar.file_uploader("Upload CSV/Excel Files", accept_multiple_files=True)
 
+if uploaded_files:
+    file_dict = {file.name: file for file in uploaded_files}
     if category == "Card":
-        metrics = process_card_data(uploaded_files)
-    else:
-        metrics = process_normal_data(uploaded_files)
-
-    if metrics:
-        st.subheader(f"{category} Category Metrics")
-        for metric, value in metrics.items():
-            st.metric(metric, value)
-else:
-    st.warning("Please upload all required files.")
+        card_data = process_card_data(file_dict)
+        if card_data:
+            card_df = pd.DataFrame(card_data, index=[0])
+            st.write("Card Data")
+            st.dataframe(card_df)
+    elif category == "Normal":
+        normal_data = process_normal_data(file_dict)
+        if normal_data:
+            normal_df = pd.DataFrame(normal_data, index=[0])
+            st.write("Normal Data")
+            st.dataframe(normal_df)
