@@ -94,11 +94,12 @@ def process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, 
 # Streamlit app
 st.title("Collection Data Analysis")
 
-result_sql_file = st.file_uploader("Upload result_sql.csv", type="csv")
-card_file = st.file_uploader("Upload card_dues.csv", type="csv")
-phase1_file = st.file_uploader("Upload Phase 1 Excel file", type="xlsx")
-phase2_self_pay_file = st.file_uploader("Upload Phase 2 Self Pay Excel file", type="xlsx")
-phase2_not_pay_file = st.file_uploader("Upload Phase 2 Not Pay Excel file", type="xlsx")
+st.sidebar.title("Upload Files")
+result_sql_file = st.sidebar.file_uploader("Upload result_sql.csv", type="csv")
+card_file = st.sidebar.file_uploader("Upload card_dues.csv", type="csv")
+phase1_file = st.sidebar.file_uploader("Upload Phase 1 Excel file", type="xlsx")
+phase2_self_pay_file = st.sidebar.file_uploader("Upload Phase 2 Self Pay Excel file", type="xlsx")
+phase2_not_pay_file = st.sidebar.file_uploader("Upload Phase 2 Not Pay Excel file", type="xlsx")
 
 if result_sql_file and card_file and phase1_file and phase2_self_pay_file and phase2_not_pay_file:
     data = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
