@@ -106,5 +106,25 @@ if result_sql_file and card_file and phase1_file and phase2_self_pay_file and ph
 
     if data is not None:
         st.write("### Collection Rates and Counts")
-        df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
+        df = pd.DataFrame({
+            "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
+            "Phase 1": [
+                data["Phase 1 Collection Rate"],
+                data["Phase 1 Count"],
+                data["Phase 1 Rate with Working Date"],
+                data["Phase 1 Count with Working Date"]
+            ],
+            "Phase 2 (Self Pay)": [
+                data["Phase 2 Collection Rate (Self Pay)"],
+                data["Phase 2 Count (Self Pay)"],
+                data["Phase 2 Rate with Working Date (Self Pay)"],
+                data["Phase 2 Count with Working Date (Self Pay)"]
+            ],
+            "Phase 2 (Not Pay)": [
+                data["Phase 2 Collection Rate (Not Pay)"],
+                data["Phase 2 Count (Not Pay)"],
+                data["Phase 2 Rate with Working Date (Not Pay)"],
+                data["Phase 2 Count with Working Date (Not Pay)"]
+            ]
+        })
         st.table(df)
