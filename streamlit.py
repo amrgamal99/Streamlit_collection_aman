@@ -247,7 +247,7 @@ else:
         normal_metrics = process_normal_data(files)
         if normal_metrics:
             normal_data = {
-                'Phase': ['Phase 1', 'Phase 2', 'Not Paid'],
+                'Solutions': ['Phase 1', 'Phase 2', 'Not Paid'],
                 'Collection Rate': [
                     normal_metrics['phase1']['collection_rate'],
                     normal_metrics['phase2']['collection_rate'],
