@@ -1,122 +1,114 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+import numpy as np
 
-# Set display options
-pd.set_option('display.max_rows', 500)
-pd.options.display.max_columns = None
+def load_data():
+    st.sidebar.header("Upload your data files")
+    
+    result_sql_file = st.sidebar.file_uploader("Upload result_sql.csv", type=["csv"])
+    card_file = st.sidebar.file_uploader("Upload card_dues.csv", type=["csv"])
+    
+    if result_sql_file is not None:
+        st.write("Result SQL file uploaded")
+        result_sql = pd.read_csv(result_sql_file)
+    else:
+        st.write("Result SQL file not uploaded")
+        return None, None
+    
+    if card_file is not None:
+        st.write("Card file uploaded")
+        card = pd.read_csv(card_file)
+    else:
+        st.write("Card file not uploaded")
+        return None, None
+    
+    return result_sql, card
 
-# Read the input files
-result_sql = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/result_sql.csv")
-card = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/card_dues.csv")
 
-# Date variables
-date = "2024-07"
-next_date = "2024-08"
+# Function to process Card data for Phase 1
+def process_card_phase1(card_file):
+    if card_file is not None:
+        card = pd.read_csv(card_file)
+        st.write("Card file uploaded successfully.")
+        
+        # Assume uploaded card file contains relevant data
+        hopefull_card = st.file_uploader("Upload Card Phase 1 Excel file", type=["xlsx"])
+        if hopefull_card is not None:
+            hopefull_card_df = pd.read_excel(hopefull_card)
+            hopefull_card_df["installment_uniqueid"] = hopefull_card_df["installment_uniqueid"].astype(str)
+            our_cases_card = card.merge(hopefull_card_df[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+            our_cases_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_card['trx_actual_collection_date'])
+            our_cases_card['trx_actual_collection_date_only'] = our_cases_card['trx_actual_collection_date'].dt.date
+            return our_cases_card
+        else:
+            st.write("Please upload the Card Phase 1 Excel file.")
+            return None
+    else:
+        st.write("Please upload the Card CSV file.")
+        return None
 
-# Phase 1 Card
-test_phase1_card = card.copy()
-test_phase1_card["installment_uniqueid"] = test_phase1_card["installment_uniqueid"].astype(str)
 
-hopefull_card = pd.read_excel("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution1_Will Pay Alone_2024-07.xlsx")
-hopefull_card["installment_uniqueid"] = hopefull_card["installment_uniqueid"].astype(str)
+# Function to process Card data for Phase 2
+def process_card_phase2(card):
+    phase2_self_pay_card = pd.read_excel("Card_Solution2_Will_Pay_Alone.xlsx")
+    phase2_self_pay_card["installment_uniqueid"] = phase2_self_pay_card["installment_uniqueid"].astype(str)
+    our_cases_2_card = card.merge(phase2_self_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+    our_cases_2_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_2_card['trx_actual_collection_date'])
+    our_cases_2_card['trx_actual_collection_date_only'] = our_cases_2_card['trx_actual_collection_date'].dt.date
+    return our_cases_2_card
 
-our_cases_card = test_phase1_card.merge(hopefull_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
-our_cases_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_card['trx_actual_collection_date'])
-our_cases_card['trx_actual_collection_date_only'] = our_cases_card['trx_actual_collection_date'].dt.date.astype(str)
+# Function to process Phase 2 with "Will Not Pay"
+def process_card_phase2_not_pay(card):
+    phase2_not_pay_card = pd.read_excel("Card_Solution2_Will_Not_Pay.xlsx")
+    phase2_not_pay_card["installment_uniqueid"] = phase2_not_pay_card["installment_uniqueid"].astype(str)
+    our_cases_3_card = card.merge(phase2_not_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+    our_cases_3_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_3_card['trx_actual_collection_date'])
+    our_cases_3_card['trx_actual_collection_date_only'] = our_cases_3_card['trx_actual_collection_date'].dt.date
+    return our_cases_3_card
 
-collected_ratio_phase1 = our_cases_card[our_cases_card["status"] == "Collected"].installment_uniqueid.nunique() / hopefull_card.installment_uniqueid.nunique()
-collected_uniqueid_phase1 = our_cases_card[our_cases_card["status"] == "Collected"].installment_uniqueid.nunique()
+# Function to compare phases
+def compare_phases(df_phase1, df_phase2):
+    collected_phase1 = df_phase1[df_phase1['status'] == 'Collected'].installment_uniqueid.nunique()
+    collected_phase2 = df_phase2[df_phase2['status'] == 'Collected'].installment_uniqueid.nunique()
+    return collected_phase1, collected_phase2
 
-ids_phase1_card = our_cases_card[our_cases_card["status"] == "Collected"]
-ids_with_dates_card = ids_phase1_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
-ids_with_dates_card["trx_actual_collection_date"] = pd.to_datetime(ids_with_dates_card["trx_actual_collection_date"])
+# Streamlit application
+def main():
+    st.title('Data Analysis Dashboard')
 
-result_sql["start_working_date"] = pd.to_datetime(result_sql["start_working_date"])
-result_sql["installment_uniqueid"] = result_sql["installment_uniqueid"].astype(str)
-ids_with_dates_card["installment_uniqueid"] = ids_with_dates_card["installment_uniqueid"].astype(str)
+    # Load data
+    result_sql, card = load_data()
 
-start_date = pd.to_datetime(date + "-05")
-filtered_result_sql = result_sql[result_sql["start_working_date"] >= start_date]
+    # Dropdown menu for user input
+    category = st.selectbox("Select Category", ["Card", "Normal"])
+    phase = st.selectbox("Select Phase", ["Phase 1", "Phase 2"])
 
-check_card = filtered_result_sql.merge(ids_with_dates_card, on="installment_uniqueid", how="inner")
-check_collected_ratio_phase1 = check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_card.shape[0]
-check_collected_uniqueid_phase1 = check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
+    # Process data based on user input
+    if category == "Card":
+        if phase == "Phase 1":
+            df = process_card_phase1(card)
+        elif phase == "Phase 2":
+            df = process_card_phase2(card)
+    else:
+        st.write("Normal category processing not implemented.")
 
-# Phase 2 Card - Will Pay Alone
-phase2_self_pay_card = pd.read_excel("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution2_ Will Pay Alone_2024-07.xlsx")
-phase2_self_pay_card["installment_uniqueid"] = phase2_self_pay_card["installment_uniqueid"].astype(str)
+    # Data comparison between phases
+    if st.button('Compare Phases'):
+        if phase == "Phase 1":
+            df_phase1 = process_card_phase1(card)
+            df_phase2 = process_card_phase2(card)
+            collected_phase1, collected_phase2 = compare_phases(df_phase1, df_phase2)
+            st.write(f"Collected in Phase 1: {collected_phase1}")
+            st.write(f"Collected in Phase 2: {collected_phase2}")
 
-our_cases_2_card = test_phase2_card.merge(phase2_self_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
-our_cases_2_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_2_card['trx_actual_collection_date'])
-our_cases_2_card['trx_actual_collection_date_only'] = our_cases_2_card['trx_actual_collection_date'].dt.date.astype(str)
+    st.write("Upload your data files here:")
+    uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
+    if uploaded_file is not None:
+        if uploaded_file.name.endswith('.csv'):
+            df_uploaded = pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith('.xlsx'):
+            df_uploaded = pd.read_excel(uploaded_file)
+        st.write(df_uploaded)
 
-collected_ratio_phase2_self = our_cases_2_card[our_cases_2_card["status"] == "Collected"].installment_uniqueid.nunique() / our_cases_2_card.installment_uniqueid.nunique()
-collected_uniqueid_phase2_self = our_cases_2_card[our_cases_2_card["status"] == "Collected"].installment_uniqueid.nunique()
-
-ids_phase2_card = our_cases_2_card[our_cases_2_card["status"] == "Collected"]
-ids_with_dates2_card = ids_phase2_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
-
-filtered_result_sql = result_sql[result_sql["start_working_date"] >= start_date]
-check2_card = filtered_result_sql.merge(ids_with_dates2_card, on="installment_uniqueid", how="inner")
-check_collected_ratio_phase2_self = check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_card.shape[0]
-check_collected_uniqueid_phase2_self = check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
-
-# Phase 2 Card - Will Not Pay
-phase2_not_pay_card = pd.read_excel("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution2_ Will Not Pay_2024-07.xlsx")
-phase2_not_pay_card["installment_uniqueid"] = phase2_not_pay_card["installment_uniqueid"].astype(str)
-
-our_cases_3_card = test_phase2_card.merge(phase2_not_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
-our_cases_3_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_3_card['trx_actual_collection_date'])
-our_cases_3_card['trx_actual_collection_date_only'] = our_cases_3_card['trx_actual_collection_date'].dt.date.astype(str)
-
-collected_uniqueid_phase2_not = our_cases_3_card[our_cases_3_card["status"] == "Collected"].installment_uniqueid.nunique()
-collected_ratio_phase2_not = collected_uniqueid_phase2_not / our_cases_3_card.installment_uniqueid.nunique()
-
-ids_phase3_card = our_cases_3_card[our_cases_3_card["status"] == "Collected"][["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
-ids_with_dates3_card = pd.DataFrame(ids_phase3_card)
-
-filtered_result_sql = result_sql[result_sql['start_working_date'] >= start_date]
-check3_card = filtered_result_sql.merge(ids_with_dates3_card, on="installment_uniqueid", how="inner")
-check_collected_ratio_phase2_not = check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_card.shape[0]
-check_collected_uniqueid_phase2_not = check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
-
-# Streamlit App
-st.title('Collection Data Analysis')
-
-# Display collected ratios and unique ids in a table
-st.subheader('Phase 1 Card - Will Pay Alone')
-st.write(pd.DataFrame({
-    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
-    'Value': [collected_ratio_phase1, collected_uniqueid_phase1]
-}))
-
-st.subheader('Phase 2 Card - Will Pay Alone')
-st.write(pd.DataFrame({
-    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
-    'Value': [collected_ratio_phase2_self, collected_uniqueid_phase2_self]
-}))
-
-st.subheader('Phase 2 Card - Will Not Pay')
-st.write(pd.DataFrame({
-    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
-    'Value': [collected_ratio_phase2_not, collected_uniqueid_phase2_not]
-}))
-
-st.subheader('Check Card - Phase 1')
-st.write(pd.DataFrame({
-    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
-    'Value': [check_collected_ratio_phase1, check_collected_uniqueid_phase1]
-}))
-
-st.subheader('Check Card - Phase 2 (Will Pay Alone)')
-st.write(pd.DataFrame({
-    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
-    'Value': [check_collected_ratio_phase2_self, check_collected_uniqueid_phase2_self]
-}))
-
-st.subheader('Check Card - Phase 2 (Will Not Pay)')
-st.write(pd.DataFrame({
-    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
-    'Value': [check_collected_ratio_phase2_not, check_collected_uniqueid_phase2_not]
-}))
+if __name__ == "__main__":
+    main()
