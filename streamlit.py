@@ -3,33 +3,33 @@ import pandas as pd
 from datetime import datetime
 
 # Function to read and process data
-def process_data(category, result_sql_file, dues_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file):
+def process_data(category, files):
     try:
-        result_sql = pd.read_csv(result_sql_file)
+        result_sql = pd.read_csv(files['result_sql.csv'])
     except Exception as e:
         st.error(f"Error reading result_sql.csv: {e}")
         return None
 
     try:
-        dues = pd.read_csv(dues_file)
+        dues = pd.read_csv(files[f'{category.lower()}_dues.csv'])
     except Exception as e:
         st.error(f"Error reading dues.csv: {e}")
         return None
 
     try:
-        hopefull = pd.read_excel(phase1_file)
+        hopefull = pd.read_excel(files[f'Phase 1 {category}.xlsx'])
     except Exception as e:
         st.error(f"Error reading Phase 1 Excel file: {e}")
         return None
 
     try:
-        phase2_self_pay = pd.read_excel(phase2_self_pay_file)
+        phase2_self_pay = pd.read_excel(files[f'Phase 2 Self Pay {category}.xlsx'])
     except Exception as e:
         st.error(f"Error reading Phase 2 Self Pay Excel file: {e}")
         return None
 
     try:
-        phase2_not_pay = pd.read_excel(phase2_not_pay_file)
+        phase2_not_pay = pd.read_excel(files[f'Phase 2 Not Pay {category}.xlsx'])
     except Exception as e:
         st.error(f"Error reading Phase 2 Not Pay Excel file: {e}")
         return None
@@ -95,38 +95,47 @@ def process_data(category, result_sql_file, dues_file, phase1_file, phase2_self_
 st.title("Collection Monitoring")
 
 st.sidebar.title("Upload Files")
-category = st.sidebar.selectbox("Select Category", ["Card", "Normal"])
+uploaded_files = st.sidebar.file_uploader("Upload all files", accept_multiple_files=True, type=['csv', 'xlsx'])
 
-result_sql_file = st.sidebar.file_uploader("Upload result_sql.csv", type="csv")
-dues_file = st.sidebar.file_uploader(f"Upload {'card_dues.csv' if category == 'Card' else 'normal_dues.csv'}", type="csv")
-phase1_file = st.sidebar.file_uploader(f"Upload Phase 1 {'Card' if category == 'Card' else 'Normal'} Excel file", type="xlsx")
-phase2_self_pay_file = st.sidebar.file_uploader(f"Upload Phase 2 Self Pay {'Card' if category == 'Card' else 'Normal'} Excel file", type="xlsx")
-phase2_not_pay_file = st.sidebar.file_uploader(f"Upload Phase 2 Not Pay {'Card' if category == 'Card' else 'Normal'} Excel file", type="xlsx")
+if uploaded_files:
+    file_dict = {file.name: file for file in uploaded_files}
 
-if result_sql_file and dues_file and phase1_file and phase2_self_pay_file and phase2_not_pay_file:
-    data = process_data(category, result_sql_file, dues_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
+    category = st.selectbox("Select Category", ["Card", "Normal"])
 
-    if data is not None:
-        st.write("### Collection Rates and Counts")
-        df = pd.DataFrame({
-            "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
-            "Phase 1": [
-                data["Phase 1 Collection Rate"],
-                data["Phase 1 Count"],
-                data["Phase 1 Rate with Working Date"],
-                data["Phase 1 Count with Working Date"]
-            ],
-            "Phase 2 (Self Pay)": [
-                data["Phase 2 Collection Rate (Self Pay)"],
-                data["Phase 2 Count (Self Pay)"],
-                data["Phase 2 Rate with Working Date (Self Pay)"],
-                data["Phase 2 Count with Working Date (Self Pay)"]
-            ],
-            "Phase 2 (Not Pay)": [
-                data["Phase 2 Collection Rate (Not Pay)"],
-                data["Phase 2 Count (Not Pay)"],
-                data["Phase 2 Rate with Working Date (Not Pay)"],
-                data["Phase 2 Count with Working Date (Not Pay)"]
-            ]
-        })
-        st.table(df)
+    required_files = [
+        'result_sql.csv',
+        f'{category.lower()}_dues.csv',
+        f'Phase 1 {category}.xlsx',
+        f'Phase 2 Self Pay {category}.xlsx',
+        f'Phase 2 Not Pay {category}.xlsx'
+    ]
+
+    if all(file in file_dict for file in required_files):
+        data = process_data(category, file_dict)
+
+        if data is not None:
+            st.write("### Collection Rates and Counts")
+            df = pd.DataFrame({
+                "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
+                "Phase 1": [
+                    data["Phase 1 Collection Rate"],
+                    data["Phase 1 Count"],
+                    data["Phase 1 Rate with Working Date"],
+                    data["Phase 1 Count with Working Date"]
+                ],
+                "Phase 2 (Self Pay)": [
+                    data["Phase 2 Collection Rate (Self Pay)"],
+                    data["Phase 2 Count (Self Pay)"],
+                    data["Phase 2 Rate with Working Date (Self Pay)"],
+                    data["Phase 2 Count with Working Date (Self Pay)"]
+                ],
+                "Phase 2 (Not Pay)": [
+                    data["Phase 2 Collection Rate (Not Pay)"],
+                    data["Phase 2 Count (Not Pay)"],
+                    data["Phase 2 Rate with Working Date (Not Pay)"],
+                    data["Phase 2 Count with Working Date (Not Pay)"]
+                ]
+            })
+            st.table(df)
+    else:
+        st.error("Please upload all the required files.")
