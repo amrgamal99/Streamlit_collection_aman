@@ -2,84 +2,121 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# Function to read and process data
-def process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file):
-    result_sql = pd.read_csv(result_sql_file)
-    card = pd.read_csv(card_file)
+# Set display options
+pd.set_option('display.max_rows', 500)
+pd.options.display.max_columns = None
 
-    hopefull_card = pd.read_excel(phase1_file)
-    phase2_self_pay_card = pd.read_excel(phase2_self_pay_file)
-    phase2_not_pay_card = pd.read_excel(phase2_not_pay_file)
+# Read the input files
+result_sql = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/result_sql.csv")
+card = pd.read_csv("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/data/card_dues.csv")
 
-    card["installment_uniqueid"] = card["installment_uniqueid"].astype(str)
-    hopefull_card["installment_uniqueid"] = hopefull_card["installment_uniqueid"].astype(str)
-    phase2_self_pay_card["installment_uniqueid"] = phase2_self_pay_card["installment_uniqueid"].astype(str)
-    phase2_not_pay_card["installment_uniqueid"] = phase2_not_pay_card["installment_uniqueid"].astype(str)
+# Date variables
+date = "2024-07"
+next_date = "2024-08"
 
-    our_cases_card = card.merge(
-        hopefull_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner"
-    )
-    our_cases_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_card['trx_actual_collection_date'])
-    our_cases_card['trx_actual_collection_date_only'] = our_cases_card['trx_actual_collection_date'].dt.date
+# Phase 1 Card
+test_phase1_card = card.copy()
+test_phase1_card["installment_uniqueid"] = test_phase1_card["installment_uniqueid"].astype(str)
 
-    collected_cases_card = our_cases_card[our_cases_card["status"] == "Collected"]
-    ids_with_dates_card = collected_cases_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
+hopefull_card = pd.read_excel("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution1_Will Pay Alone_2024-07.xlsx")
+hopefull_card["installment_uniqueid"] = hopefull_card["installment_uniqueid"].astype(str)
 
-    result_sql["start_working_date"] = pd.to_datetime(result_sql["start_working_date"])
-    result_sql["installment_uniqueid"] = result_sql["installment_uniqueid"].astype(str)
+our_cases_card = test_phase1_card.merge(hopefull_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+our_cases_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_card['trx_actual_collection_date'])
+our_cases_card['trx_actual_collection_date_only'] = our_cases_card['trx_actual_collection_date'].dt.date.astype(str)
 
-    start_date = pd.Timestamp("2024-07-05")
-    filtered_result_sql = result_sql[result_sql["start_working_date"] >= start_date]
-    check_card = filtered_result_sql.merge(ids_with_dates_card, on="installment_uniqueid", how="inner")
+collected_ratio_phase1 = our_cases_card[our_cases_card["status"] == "Collected"].installment_uniqueid.nunique() / hopefull_card.installment_uniqueid.nunique()
+collected_uniqueid_phase1 = our_cases_card[our_cases_card["status"] == "Collected"].installment_uniqueid.nunique()
 
-    test_phase2_card = card.copy()
-    our_cases_2_card = test_phase2_card.merge(
-        phase2_self_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner"
-    )
-    our_cases_2_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_2_card['trx_actual_collection_date'])
-    our_cases_2_card['trx_actual_collection_date_only'] = our_cases_2_card['trx_actual_collection_date'].dt.date
+ids_phase1_card = our_cases_card[our_cases_card["status"] == "Collected"]
+ids_with_dates_card = ids_phase1_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
+ids_with_dates_card["trx_actual_collection_date"] = pd.to_datetime(ids_with_dates_card["trx_actual_collection_date"])
 
-    collected_cases_2_card = our_cases_2_card[our_cases_2_card["status"] == "Collected"]
-    ids_with_dates2_card = collected_cases_2_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
-    check2_card = filtered_result_sql.merge(ids_with_dates2_card, on="installment_uniqueid", how="inner")
+result_sql["start_working_date"] = pd.to_datetime(result_sql["start_working_date"])
+result_sql["installment_uniqueid"] = result_sql["installment_uniqueid"].astype(str)
+ids_with_dates_card["installment_uniqueid"] = ids_with_dates_card["installment_uniqueid"].astype(str)
 
-    our_cases_3_card = test_phase2_card.merge(
-        phase2_not_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner"
-    )
-    our_cases_3_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_3_card['trx_actual_collection_date'])
-    our_cases_3_card['trx_actual_collection_date_only'] = our_cases_3_card['trx_actual_collection_date'].dt.date
+start_date = pd.to_datetime(date + "-05")
+filtered_result_sql = result_sql[result_sql["start_working_date"] >= start_date]
 
-    collected_cases_3_card = our_cases_3_card[our_cases_3_card["status"] == "Collected"]
-    ids_with_dates3_card = collected_cases_3_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
-    check3_card = filtered_result_sql.merge(ids_with_dates3_card, on="installment_uniqueid", how="inner")
+check_card = filtered_result_sql.merge(ids_with_dates_card, on="installment_uniqueid", how="inner")
+check_collected_ratio_phase1 = check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_card.shape[0]
+check_collected_uniqueid_phase1 = check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
 
-    return {
-        "Phase 1 Collection Rate": collected_cases_card["installment_uniqueid"].nunique() / hopefull_card["installment_uniqueid"].nunique(),
-        "Phase 1 Count": collected_cases_card["installment_uniqueid"].nunique(),
-        "Phase 1 Rate with Working Date": check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / hopefull_card.shape[0],
-        "Phase 1 Count with Working Date": check_card[check_card["start_working_date"] < check_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
-        "Phase 2 Collection Rate (Self Pay)": collected_cases_2_card["installment_uniqueid"].nunique() / phase2_self_pay_card["installment_uniqueid"].nunique(),
-        "Phase 2 Count (Self Pay)": collected_cases_2_card["installment_uniqueid"].nunique(),
-        "Phase 2 Rate with Working Date (Self Pay)": check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_card.shape[0],
-        "Phase 2 Count with Working Date (Self Pay)": check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique(),
-        "Phase 2 Count (Not Pay)": collected_cases_3_card["installment_uniqueid"].nunique(),
-        "Phase 2 Collection Rate (Not Pay)": collected_cases_3_card["installment_uniqueid"].nunique() / phase2_not_pay_card["installment_uniqueid"].nunique(),
-        "Phase 2 Rate with Working Date (Not Pay)": check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_card.shape[0],
-        "Phase 2 Count with Working Date (Not Pay)": check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
-    }
+# Phase 2 Card - Will Pay Alone
+phase2_self_pay_card = pd.read_excel("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution2_ Will Pay Alone_2024-07.xlsx")
+phase2_self_pay_card["installment_uniqueid"] = phase2_self_pay_card["installment_uniqueid"].astype(str)
 
-# Streamlit app
-st.title("Collection Data Analysis")
+our_cases_2_card = test_phase2_card.merge(phase2_self_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+our_cases_2_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_2_card['trx_actual_collection_date'])
+our_cases_2_card['trx_actual_collection_date_only'] = our_cases_2_card['trx_actual_collection_date'].dt.date.astype(str)
 
-result_sql_file = st.file_uploader("Upload result_sql.csv", type="csv")
-card_file = st.file_uploader("Upload card_dues.csv", type="csv")
-phase1_file = st.file_uploader("Upload Phase 1 Excel file", type="xlsx")
-phase2_self_pay_file = st.file_uploader("Upload Phase 2 Self Pay Excel file", type="xlsx")
-phase2_not_pay_file = st.file_uploader("Upload Phase 2 Not Pay Excel file", type="xlsx")
+collected_ratio_phase2_self = our_cases_2_card[our_cases_2_card["status"] == "Collected"].installment_uniqueid.nunique() / our_cases_2_card.installment_uniqueid.nunique()
+collected_uniqueid_phase2_self = our_cases_2_card[our_cases_2_card["status"] == "Collected"].installment_uniqueid.nunique()
 
-if result_sql_file and card_file and phase1_file and phase2_self_pay_file and phase2_not_pay_file:
-    data = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
+ids_phase2_card = our_cases_2_card[our_cases_2_card["status"] == "Collected"]
+ids_with_dates2_card = ids_phase2_card[["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
 
-    st.write("### Collection Rates and Counts")
-    df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
-    st.table(df)
+filtered_result_sql = result_sql[result_sql["start_working_date"] >= start_date]
+check2_card = filtered_result_sql.merge(ids_with_dates2_card, on="installment_uniqueid", how="inner")
+check_collected_ratio_phase2_self = check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_2_card.shape[0]
+check_collected_uniqueid_phase2_self = check2_card[check2_card["start_working_date"] < check2_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
+
+# Phase 2 Card - Will Not Pay
+phase2_not_pay_card = pd.read_excel("C:/Users/PC/OneDrive - Cairo University - Students/aman internship/collection_data/Data Science - Internship-20240723T123248Z-001/Data Science - Internship/list_of_customers/Card_Solution2_ Will Not Pay_2024-07.xlsx")
+phase2_not_pay_card["installment_uniqueid"] = phase2_not_pay_card["installment_uniqueid"].astype(str)
+
+our_cases_3_card = test_phase2_card.merge(phase2_not_pay_card[["installment_uniqueid"]], on="installment_uniqueid", how="inner")
+our_cases_3_card['trx_actual_collection_date'] = pd.to_datetime(our_cases_3_card['trx_actual_collection_date'])
+our_cases_3_card['trx_actual_collection_date_only'] = our_cases_3_card['trx_actual_collection_date'].dt.date.astype(str)
+
+collected_uniqueid_phase2_not = our_cases_3_card[our_cases_3_card["status"] == "Collected"].installment_uniqueid.nunique()
+collected_ratio_phase2_not = collected_uniqueid_phase2_not / our_cases_3_card.installment_uniqueid.nunique()
+
+ids_phase3_card = our_cases_3_card[our_cases_3_card["status"] == "Collected"][["installment_uniqueid", "trx_actual_collection_date"]].drop_duplicates()
+ids_with_dates3_card = pd.DataFrame(ids_phase3_card)
+
+filtered_result_sql = result_sql[result_sql['start_working_date'] >= start_date]
+check3_card = filtered_result_sql.merge(ids_with_dates3_card, on="installment_uniqueid", how="inner")
+check_collected_ratio_phase2_not = check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique() / our_cases_3_card.shape[0]
+check_collected_uniqueid_phase2_not = check3_card[check3_card["start_working_date"] < check3_card["trx_actual_collection_date"]].installment_uniqueid.nunique()
+
+# Streamlit App
+st.title('Collection Data Analysis')
+
+# Display collected ratios and unique ids in a table
+st.subheader('Phase 1 Card - Will Pay Alone')
+st.write(pd.DataFrame({
+    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
+    'Value': [collected_ratio_phase1, collected_uniqueid_phase1]
+}))
+
+st.subheader('Phase 2 Card - Will Pay Alone')
+st.write(pd.DataFrame({
+    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
+    'Value': [collected_ratio_phase2_self, collected_uniqueid_phase2_self]
+}))
+
+st.subheader('Phase 2 Card - Will Not Pay')
+st.write(pd.DataFrame({
+    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
+    'Value': [collected_ratio_phase2_not, collected_uniqueid_phase2_not]
+}))
+
+st.subheader('Check Card - Phase 1')
+st.write(pd.DataFrame({
+    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
+    'Value': [check_collected_ratio_phase1, check_collected_uniqueid_phase1]
+}))
+
+st.subheader('Check Card - Phase 2 (Will Pay Alone)')
+st.write(pd.DataFrame({
+    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
+    'Value': [check_collected_ratio_phase2_self, check_collected_uniqueid_phase2_self]
+}))
+
+st.subheader('Check Card - Phase 2 (Will Not Pay)')
+st.write(pd.DataFrame({
+    'Metric': ['Collected Ratio', 'Collected Unique IDs'],
+    'Value': [check_collected_ratio_phase2_not, check_collected_uniqueid_phase2_not]
+}))
