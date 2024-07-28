@@ -180,76 +180,53 @@ def process_normal_data(files):
         "Phase 2 Count with Working Date (Not Pay)": check3_normal[check3_normal["start_working_date"] < check3_normal["trx_actual_collection_date"]].installment_uniqueid.nunique()
     }
 
-st.sidebar.title("Upload Excel Files")
-uploaded_files = {
-    'result_sql.csv': st.sidebar.file_uploader("Upload result_sql.csv", type=["csv"]),
-    'card_dues.csv': st.sidebar.file_uploader("Upload card_dues.csv", type=["csv"]),
-    'normal_dues.csv': st.sidebar.file_uploader("Upload normal_dues.csv", type=["csv"]),
-    'Phase 1 Card.xlsx': st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type=["xlsx"]),
-    'Phase 2 Self Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type=["xlsx"]),
-    'Phase 2 Not Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type=["xlsx"]),
-    'Phase 1 Normal.xlsx': st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type=["xlsx"]),
-    'Phase 2 Self Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type=["xlsx"]),
-    'Phase 2 Not Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type=["xlsx"])
-}
+# Main app
+def main():
+    st.title("Customer Payment Data Analysis")
+    st.sidebar.header("Upload Files")
 
-category = st.selectbox("Select Category", ["Card", "Normal"])
+    file_types = ["csv", "xlsx"]
+    uploaded_files = {
+        'result_sql.csv': st.sidebar.file_uploader("Upload result_sql.csv", type=file_types),
+        'card_dues.csv': st.sidebar.file_uploader("Upload card_dues.csv", type=file_types),
+        'normal_dues.csv': st.sidebar.file_uploader("Upload normal_dues.csv", type=file_types),
+        'Phase 1 Card.xlsx': st.sidebar.file_uploader("Upload Phase 1 Card.xlsx", type=file_types),
+        'Phase 2 Self Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Card.xlsx", type=file_types),
+        'Phase 2 Not Pay Card.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Card.xlsx", type=file_types),
+        'Phase 1 Normal.xlsx': st.sidebar.file_uploader("Upload Phase 1 Normal.xlsx", type=file_types),
+        'Phase 2 Self Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Self Pay Normal.xlsx", type=file_types),
+        'Phase 2 Not Pay Normal.xlsx': st.sidebar.file_uploader("Upload Phase 2 Not Pay Normal.xlsx", type=file_types),
+    }
 
-if category == "Card":
-    if all(uploaded_files[key] for key in ['result_sql.csv', 'card_dues.csv', 'Phase 1 Card.xlsx', 'Phase 2 Self Pay Card.xlsx', 'Phase 2 Not Pay Card.xlsx']):
-        card_data = process_card_data(uploaded_files)
-        if card_data:
-            card_df = pd.DataFrame({
-                "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
-                "Phase 1": [
-                    card_data["Phase 1 Collection Rate"],
-                    card_data["Phase 1 Count"],
-                    card_data["Phase 1 Rate with Working Date"],
-                    card_data["Phase 1 Count with Working Date"]
-                ],
-                "Phase 2 (Self Pay)": [
-                    card_data["Phase 2 Collection Rate (Self Pay)"],
-                    card_data["Phase 2 Count (Self Pay)"],
-                    card_data["Phase 2 Rate with Working Date (Self Pay)"],
-                    card_data["Phase 2 Count with Working Date (Self Pay)"]
-                ],
-                "Phase 2 (Not Pay)": [
-                    card_data["Phase 2 Collection Rate (Not Pay)"],
-                    card_data["Phase 2 Count (Not Pay)"],
-                    card_data["Phase 2 Rate with Working Date (Not Pay)"],
-                    card_data["Phase 2 Count with Working Date (Not Pay)"]
-                ]
-            })
-            st.write("Card Data Metrics")
-            st.write(card_df)
+    if all(file is not None for file in uploaded_files.values()):
+        st.sidebar.success("All files uploaded!")
+        category = st.sidebar.selectbox("Select Category", ["Card", "Normal"])
+
+        if category == "Card":
+            metrics = process_card_data(uploaded_files)
+        else:
+            metrics = process_normal_data(uploaded_files)
+
+        if metrics:
+            st.write(f"### {category} Metrics")
+            data = [
+                ["Phase", "Metric", "Value"],
+                ["Phase 1", "Collection Rate", metrics["Phase 1 Collection Rate"]],
+                ["Phase 1", "Count", metrics["Phase 1 Count"]],
+                ["Phase 1", "Rate with Working Date", metrics["Phase 1 Rate with Working Date"]],
+                ["Phase 1", "Count with Working Date", metrics["Phase 1 Count with Working Date"]],
+                ["Phase 2 Self Pay", "Collection Rate", metrics["Phase 2 Collection Rate (Self Pay)"]],
+                ["Phase 2 Self Pay", "Count", metrics["Phase 2 Count (Self Pay)"]],
+                ["Phase 2 Self Pay", "Rate with Working Date", metrics["Phase 2 Rate with Working Date (Self Pay)"]],
+                ["Phase 2 Self Pay", "Count with Working Date", metrics["Phase 2 Count with Working Date (Self Pay)"]],
+                ["Phase 2 Not Pay", "Collection Rate", metrics["Phase 2 Collection Rate (Not Pay)"]],
+                ["Phase 2 Not Pay", "Count", metrics["Phase 2 Count (Not Pay)"]],
+                ["Phase 2 Not Pay", "Rate with Working Date", metrics["Phase 2 Rate with Working Date (Not Pay)"]],
+                ["Phase 2 Not Pay", "Count with Working Date", metrics["Phase 2 Count with Working Date (Not Pay)"]],
+            ]
+            st.table(data)
     else:
-        st.warning("Please upload all Card related files.")
-elif category == "Normal":
-    if all(uploaded_files[key] for key in ['result_sql.csv', 'normal_dues.csv', 'Phase 1 Normal.xlsx', 'Phase 2 Self Pay Normal.xlsx', 'Phase 2 Not Pay Normal.xlsx']):
-        normal_data = process_normal_data(uploaded_files)
-        if normal_data:
-            normal_df = pd.DataFrame({
-                "Metrics": ["Collection Rate", "Count", "After Call Rate", "After Call Count"],
-                "Phase 1": [
-                    normal_data["Phase 1 Collection Rate"],
-                    normal_data["Phase 1 Count"],
-                    normal_data["Phase 1 Rate with Working Date"],
-                    normal_data["Phase 1 Count with Working Date"]
-                ],
-                "Phase 2 (Self Pay)": [
-                    normal_data["Phase 2 Collection Rate (Self Pay)"],
-                    normal_data["Phase 2 Count (Self Pay)"],
-                    normal_data["Phase 2 Rate with Working Date (Self Pay)"],
-                    normal_data["Phase 2 Count with Working Date (Self Pay)"]
-                ],
-                "Phase 2 (Not Pay)": [
-                    normal_data["Phase 2 Collection Rate (Not Pay)"],
-                    normal_data["Phase 2 Count (Not Pay)"],
-                    normal_data["Phase 2 Rate with Working Date (Not Pay)"],
-                    normal_data["Phase 2 Count with Working Date (Not Pay)"]
-                ]
-            })
-            st.write("Normal Data Metrics")
-            st.write(normal_df)
-    else:
-        st.warning("Please upload all Normal related files.")
+        st.sidebar.error("Please upload all required files.")
+
+if __name__ == "__main__":
+    main()
