@@ -1,16 +1,38 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from datetime import datetime
 
 # Function to read and process data
 def process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file):
-    result_sql = pd.read_csv(result_sql_file)
-    card = pd.read_csv(card_file)
+    try:
+        result_sql = pd.read_csv(result_sql_file)
+    except Exception as e:
+        st.error(f"Error reading result_sql.csv: {e}")
+        return None
 
-    hopefull_card = pd.read_excel(phase1_file)
-    phase2_self_pay_card = pd.read_excel(phase2_self_pay_file)
-    phase2_not_pay_card = pd.read_excel(phase2_not_pay_file)
+    try:
+        card = pd.read_csv(card_file)
+    except Exception as e:
+        st.error(f"Error reading card_dues.csv: {e}")
+        return None
+
+    try:
+        hopefull_card = pd.read_excel(phase1_file)
+    except Exception as e:
+        st.error(f"Error reading Phase 1 Excel file: {e}")
+        return None
+
+    try:
+        phase2_self_pay_card = pd.read_excel(phase2_self_pay_file)
+    except Exception as e:
+        st.error(f"Error reading Phase 2 Self Pay Excel file: {e}")
+        return None
+
+    try:
+        phase2_not_pay_card = pd.read_excel(phase2_not_pay_file)
+    except Exception as e:
+        st.error(f"Error reading Phase 2 Not Pay Excel file: {e}")
+        return None
 
     card["installment_uniqueid"] = card["installment_uniqueid"].astype(str)
     hopefull_card["installment_uniqueid"] = hopefull_card["installment_uniqueid"].astype(str)
@@ -81,39 +103,7 @@ phase2_not_pay_file = st.file_uploader("Upload Phase 2 Not Pay Excel file", type
 if result_sql_file and card_file and phase1_file and phase2_self_pay_file and phase2_not_pay_file:
     data = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
 
-    st.write("### Collection Rates and Counts")
-    df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
-    st.table(df)
-
-# Dropdown menu for user input
-category = st.selectbox("Select Category", ["Card", "Normal"])
-phase = st.selectbox("Select Phase", ["Phase 1", "Phase 2"])
-
-# Process data based on user input
-if category == "Card":
-    if phase == "Phase 1":
-        df = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
-    elif phase == "Phase 2":
-        df = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
-else:
-    st.write("Normal category processing not implemented.")
-
-# Data comparison between phases
-if st.button('Compare Phases'):
-    df_phase1 = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
-    df_phase2 = process_data(result_sql_file, card_file, phase1_file, phase2_self_pay_file, phase2_not_pay_file)
-    collected_phase1, collected_phase2 = compare_phases(df_phase1, df_phase2)
-    st.write(f"Collected in Phase 1: {collected_phase1}")
-    st.write(f"Collected in Phase 2: {collected_phase2}")
-
-st.write("Upload your data files here:")
-uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
-if uploaded_file is not None:
-    if uploaded_file.name.endswith('.csv'):
-        df_uploaded = pd.read_csv(uploaded_file)
-    elif uploaded_file.name.endswith('.xlsx'):
-        df_uploaded = pd.read_excel(uploaded_file)
-    st.write(df_uploaded)
-
-if __name__ == "__main__":
-    main()
+    if data is not None:
+        st.write("### Collection Rates and Counts")
+        df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
+        st.table(df)
